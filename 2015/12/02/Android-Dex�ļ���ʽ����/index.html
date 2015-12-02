@@ -31,8 +31,7 @@ dex文件的结构如下图：">
 <meta property="og:image" content="http://yoursite.com/2.png">
 <meta property="og:image" content="http://yoursite.com/1.png">
 <meta property="og:image" content="http://yoursite.com/3.png">
-<meta property="og:image" content="http://yoursite.com/4.png">
-<meta property="og:updated_time" content="2015-12-01T16:55:47.793Z">
+<meta property="og:updated_time" content="2015-12-02T04:48:36.814Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android Dex文件格式解析 | Ly1ris's Blog">
 <meta name="twitter:description" content="Dex文件是Android虚拟机下的可执行文件，包含了应用程序所用到所有操作指令和运行时数据。在程序编译过程中，java源文件先被编译成class文件，然后通过dx工具将多个class文件整合为一个dex文件。这样的文件结构使得各个类能够共享数据，充分减少了存储空间，提升了运行效率。
@@ -282,8 +281,7 @@ typedef struct DexFile {
 </tr>
 </tbody>
 </table>
-<p>##Header</p>
-<p>header是dex文件的文件头，简单的记录了dex文件的一些基本信息和大致的数据分布。header的大小固定为0x70,其中每一项信息所占用的大小也是固定的。同样在/dalvik/libdex/DexFile.h可以看到header_item的定义：<br>    /*</p>
+<h2 id="Header">Header</h2><p>header是dex文件的文件头，简单的记录了dex文件的一些基本信息和大致的数据分布。header的大小固定为0x70,其中每一项信息所占用的大小也是固定的。同样在/dalvik/libdex/DexFile.h可以看到header_item的定义：<br>    /*</p>
 <pre><code> * Direct-mapped "header_item" struct.
  */
 typedef struct DexHeader {
@@ -483,8 +481,7 @@ typedef struct DexMapList {
      kDexTypeEncodedArrayItem         = <span class="number">0x2005</span>,
      kDexTypeAnnotationsDirectoryItem = <span class="number">0x2006</span>,
  };
-</code></pre><p>##string_ids</p>
-<p>这一块区域中存储的是dex文件中字符串的资源的索引信息。即目标字符串在dex文件数据区的物理偏移地址。在DexFile.h中可以找到它的定义：</p>
+</code></pre><h2 id="string_ids">string_ids</h2><p>这一块区域中存储的是dex文件中字符串的资源的索引信息。即目标字符串在dex文件数据区的物理偏移地址。在DexFile.h中可以找到它的定义：</p>
 <pre><code><span class="class"><span class="keyword">struct</span> <span class="title">DexStringId</span> </span>{
     u4 stringDataOff; <span class="comment">/* 在dex文件中实际偏移量 */</span>
 };
@@ -499,14 +496,12 @@ typedef struct DexMapList {
 <li>采用空字符作为字符串的结尾<br>MUTF-8字符串的头部存放的是由uleb128编码的字符串个数(字符串个数不包括结尾的空字符)。</li>
 </ul>
 </blockquote>
-<p>##type_ids</p>
-<p>这一块区域中存储的是类型资源的索引信息。定义如下：</p>
+<h2 id="type_ids">type_ids</h2><p>这一块区域中存储的是类型资源的索引信息。定义如下：</p>
 <pre><code><span class="class"><span class="keyword">struct</span> <span class="title">DexTypeId</span> </span>{
     u4 descriptorIdx; <span class="comment">/* 指向字符串索引表 */</span>
 };
 </code></pre><p>在dex中，类型是是以字符串的形式保存在数据区的，因此DexTypeId数据结构中的descriptorIdx保存的是目标类型在字符串索引表里的序列号。虚拟机通过这个序列号从字符串索引表中找出对应类型的字符串。</p>
-<p>##proto_ids</p>
-<p>这一区域中存储的内容是方法原型资源的索引信息，数据结构DexProtoId负责规格化这些信息。</p>
+<h2 id="proto_ids">proto_ids</h2><p>这一区域中存储的内容是方法原型资源的索引信息，数据结构DexProtoId负责规格化这些信息。</p>
 <pre><code>struct DexProtoId {
     u4 shortyIdx; /<span class="keyword">*</span> 方法声明字符串，指向字符串索引表 <span class="keyword">*</span>/
     u4 returnTypeIdx; /<span class="keyword">*</span> 方法返回类型，指向字符串索引表 <span class="keyword">*</span>/
@@ -529,24 +524,21 @@ typedef struct DexTypeItem {
     u2  typeIdx;            /<span class="keyword">*</span> 表示参数类型，指向type_ids索引表 <span class="keyword">*</span>/
 } DexTypeItem;
 </code></pre><p>typeIdx指向类型资源索引表，虚拟机通过该变亮就能获得相应的参数类型。</p>
-<p>##field_ids</p>
-<p>这一块区域保存的是代码中的字段的索引信息。用数据结构DexFieldId对索引信息规格化。</p>
+<h2 id="field_ids">field_ids</h2><p>这一块区域保存的是代码中的字段的索引信息。用数据结构DexFieldId对索引信息规格化。</p>
 <pre><code>struct DexFieldId {
     u2 classIdx; /<span class="keyword">*</span> 表示所属类的类型 <span class="keyword">*</span>/
     u2 typeIdx; /<span class="keyword">*</span>  表示字段的类型 <span class="keyword">*</span>/
     u4 nameIdx; /<span class="keyword">*</span>  字段的名称 <span class="keyword">*</span>/
 };
 </code></pre><p>在DexFieldId中,classIdx和typeIdx都是指向类型索引表type_ids中的一个DexTypeId表项。而nameIdx是指向字符串索引表string_ids中的一个表项。</p>
-<p>##method_ids</p>
-<p>method_ids资源区保存的是Dex文件中类方法数据的索引信息。采用的数据结构为</p>
+<h2 id="method_ids">method_ids</h2><p>method_ids资源区保存的是Dex文件中类方法数据的索引信息。采用的数据结构为</p>
 <pre><code>struct DexMethodId {
     u2 classIdx; /<span class="keyword">*</span> 表示所属类的类型 <span class="keyword">*</span>/
     u2 protoIdx; /<span class="keyword">*</span> 表示方法原型的类型 <span class="keyword">*</span>/
     u4 nameIdx; /<span class="keyword">*</span> 方法名称 <span class="keyword">*</span>/
 };
 </code></pre><p>classIdx指向类型索引表type_ids中的一个DexTypeId，变量protoIdx记录的该方法的原型，指向proto_ids表。nameIdx指向字符串表string_ids，表示方法名称。</p>
-<p>##class_def</p>
-<p>在class_def资源区中，使用数据结构DexClassDef来对资源信息规格化。</p>
+<h2 id="class_def">class_def</h2><p>在class_def资源区中，使用数据结构DexClassDef来对资源信息规格化。</p>
 <pre><code>struct DexClassDef {
     u4 classIdx; /<span class="keyword">*</span> 表示类的类型，指向类型索引表 <span class="keyword">*</span>/
     u4 accessFlags; /<span class="keyword">*</span> 访问标识符 <span class="keyword">*</span>/
@@ -775,13 +767,31 @@ DEX_INLINE <span class="literal">void</span> dexReadClassDataMethod(const u1** p
     /<span class="keyword">*</span> followed by catch_handler_item[handlersSize] <span class="keyword">*</span>/
 };
 </code></pre><p>Dex文件通过DexCode来管理类方法，成员insns数组保存的就是方法的真实指令的二进制数据，关于对这些数据的解析，可以参考 <a href="https://source.android.com/devices/tech/dalvik/dalvik-bytecode.html" target="_blank" rel="external">https://source.android.com/devices/tech/dalvik/dalvik-bytecode.html</a>。</p>
-<p>最后放一张boyliang发的dex文件结构思维导图。</p>
-<p><img src="4.png" alt=""></p>
 
   </section>
 
   
   
+
+<section class="post-comments">
+
+    <div class="ds-thread" data-thread-key="2015/12/02/Android-Dex文件格式解析/"></div>
+
+    <script type="text/javascript">
+      var duoshuoQuery = {short_name:"letian"};
+      (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = '//static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+        || document.getElementsByTagName('body')[0]).appendChild(ds);
+      })();
+    </script> 
+
+</section>
+
+
 </article>
 
 
